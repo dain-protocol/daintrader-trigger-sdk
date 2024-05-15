@@ -1,6 +1,6 @@
 import { load } from "https://deno.land/std@0.224.0/dotenv/mod.ts";
 
-import { assets } from "./index.ts";
+import { assets } from "./data.ts";
 import { sendSol, sendToken } from "./transaction.ts";
 import fetcher from "./util/signFetch.ts";
 const env = await load();
