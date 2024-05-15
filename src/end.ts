@@ -7,6 +7,7 @@ const env = await load();
 
 const address = env.OWNER_ADDRESS;
 const triggerAddress = env.TRIGGER_ADDRESS;
+const ownerAddress = env.OWNER_ADDRESS;
 
 export async function end() {
   console.log("ending and redepositing into main account");
@@ -23,7 +24,7 @@ export async function end() {
     // send all tokens back to main account
 
     await sendToken(
-      triggerAddress,
+      ownerAddress,
       token.token.address,
       token.balance,
     );
@@ -34,7 +35,7 @@ export async function end() {
   console.log(`Redepositing ${allAssets.sol.balance} SOL`);
 
   await sendSol(
-    triggerAddress,
+    ownerAddress,
     allAssets.sol.balance - 0.000005,
   );
 
