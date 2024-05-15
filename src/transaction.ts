@@ -1,5 +1,3 @@
-import { load } from "https://deno.land/std@0.224.0/dotenv/mod.ts";
-const env = await load();
 import {
   Connection,
   Keypair,
@@ -8,11 +6,12 @@ import {
 import base58 from "npm:bs58";
 import sendTX from "./util/sendTx.ts";
 import fetcher from "./util/signFetch.ts";
+import { env } from "./util/env.ts";
 
-const triggerAddress = env.TRIGGER_ADDRESS;
-const connection = new Connection(env.RPC_URL as string);
+const triggerAddress = env("TRIGGER_ADDRESS");
+const connection = new Connection(env("RPC_URL") as string);
 const triggerKeypair = Keypair.fromSecretKey(
-  base58.decode(env.TRIGGER_ADDRESS_PRIVATE_KEY as string),
+  base58.decode(env("TRIGGER_ADDRESS_PRIVATE_KEY") as string),
 );
 
 export async function swap(
@@ -31,7 +30,7 @@ async function createSwapTx(
   amount: number,
   slippageBps: number,
 ): Promise<string> {
-  const url = `${env.API_URL}/autonomy-sdk-api/tx/swap`;
+  const url = `${env("API_URL")}/autonomy-sdk-api/tx/swap`;
   const {
     success,
     serializedTx,
@@ -67,7 +66,7 @@ async function createSendTokenTx(
   token: string,
   amount: number,
 ): Promise<string> {
-  const url = `${env.API_URL}/autonomy-sdk-api/tx/sendToken`;
+  const url = `${env("API_URL")}/autonomy-sdk-api/tx/sendToken`;
 
   const {
     success,
@@ -98,7 +97,7 @@ export async function sendSol(
 }
 
 async function createSendSolTx(to: string, amount: number): Promise<string> {
-  const url = `${env.API_URL}/autonomy-sdk-api/tx/sendSol`;
+  const url = `${env("API_URL")}/autonomy-sdk-api/tx/sendSol`;
   const {
     serializedTx,
     success,

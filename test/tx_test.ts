@@ -1,11 +1,8 @@
 import { assertEquals } from "jsr:@std/assert";
 
-import { assets, price } from "../src/index.ts";
+import { assets, price } from "../src/data.ts";
 
 import { sendSol, sendToken, swap } from "../src/transaction.ts";
-import { Connection, PublicKey } from "npm:@solana/web3.js";
-import { load } from "https://deno.land/std@0.224.0/dotenv/mod.ts";
-const env = await load();
 
 Deno.test("sendSol", async () => {
   const tx = await sendSol(

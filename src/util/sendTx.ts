@@ -1,6 +1,5 @@
 import base58 from "npm:bs58";
-import { load } from "https://deno.land/std@0.224.0/dotenv/mod.ts";
-const env = await load();
+import { env } from "./env.ts";
 
 export default async function sendTX(serializedTx: Uint8Array): Promise<{
   success: boolean;
@@ -9,7 +8,7 @@ export default async function sendTX(serializedTx: Uint8Array): Promise<{
 }> {
   try {
     const { signature, success, error } = await fetch(
-      env.TX_SENDER_URL as string,
+      env("TX_SENDER_URL") as string,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },

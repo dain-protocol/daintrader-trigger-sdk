@@ -1,12 +1,12 @@
 import { ed25519 } from "npm:@noble/curves/ed25519";
-import { load } from "https://deno.land/std@0.224.0/dotenv/mod.ts";
-const env = await load();
+
 import base58 from "npm:bs58";
 import { Keypair } from "npm:@solana/web3.js";
+import { env } from "./env.ts";
 
-const triggerAddress = env.TRIGGER_ADDRESS;
+const triggerAddress = env("TRIGGER_ADDRESS");
 const triggerKeypair = Keypair.fromSecretKey(
-  base58.decode(env.TRIGGER_ADDRESS_PRIVATE_KEY as string),
+  base58.decode(env("TRIGGER_ADDRESS_PRIVATE_KEY")),
 );
 export async function signData(
   data: Object,

@@ -1,12 +1,12 @@
-import { load } from "https://deno.land/std@0.224.0/dotenv/mod.ts";
+import { env } from "./util/env.ts";
 import fetcher from "./util/signFetch.ts";
-const env = await load();
 
-const triggerAddress = env.TRIGGER_ADDRESS;
+const triggerAddress = env("TRIGGER_ADDRESS");
 
 export async function price(token: string): Promise<number> {
-  const url =
-    `${env.API_URL}/autonomy-sdk-api/price?token=${token}&triggerAddress=${triggerAddress}`;
+  const url = `${
+    env("API_URL")
+  }/autonomy-sdk-api/price?token=${token}&triggerAddress=${triggerAddress}`;
   const response = await fetcher<{
     price: number;
     success: boolean;
@@ -56,7 +56,7 @@ export interface SolBalance {
 }
 
 export async function assets(address: string): Promise<WalletAssets> {
-  const url = `${env.API_URL}/autonomy-sdk-api/assets?address=${address}`;
+  const url = `${env("API_URL")}/autonomy-sdk-api/assets?address=${address}`;
   const response = await fetcher<{
     success: boolean;
     assets: WalletAssets;
