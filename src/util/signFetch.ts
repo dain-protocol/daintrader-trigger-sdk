@@ -2,7 +2,8 @@ import { ed25519 } from "npm:@noble/curves/ed25519";
 
 import base58 from "npm:bs58";
 import { Keypair } from "npm:@solana/web3.js";
-import { env } from "./env.ts";
+import { loadEnv } from "./env.ts";
+const env = await loadEnv();
 
 const triggerAddress = env("TRIGGER_ADDRESS");
 const triggerKeypair = Keypair.fromSecretKey(
@@ -47,7 +48,7 @@ export default async function fetcher<T>(
         "x-signature": signature,
         "x-date": toSign.date,
         "x-nonce": toSign.nonce,
-        "x-trigger-address": triggerAddress,
+        "x-trigger-address": triggerAddress as string,
       },
     });
 

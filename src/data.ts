@@ -1,6 +1,6 @@
-import { env } from "./util/env.ts";
+import { loadEnv } from "./util/env.ts";
 import fetcher from "./util/signFetch.ts";
-
+const env = await loadEnv();
 const triggerAddress = env("TRIGGER_ADDRESS");
 
 export async function price(token: string): Promise<number> {

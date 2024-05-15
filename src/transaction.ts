@@ -6,7 +6,9 @@ import {
 import base58 from "npm:bs58";
 import sendTX from "./util/sendTx.ts";
 import fetcher from "./util/signFetch.ts";
-import { env } from "./util/env.ts";
+import { loadEnv } from "./util/env.ts";
+
+const env = await loadEnv();
 
 const triggerAddress = env("TRIGGER_ADDRESS");
 const connection = new Connection(env("RPC_URL") as string);

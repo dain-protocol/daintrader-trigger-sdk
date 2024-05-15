@@ -1,13 +1,12 @@
-import { load } from "https://deno.land/std@0.224.0/dotenv/mod.ts";
-
 import { assets } from "./data.ts";
 import { sendSol, sendToken } from "./transaction.ts";
 import fetcher from "./util/signFetch.ts";
-const env = await load();
+import { loadEnv } from "./util/env.ts";
 
-const address = env.OWNER_ADDRESS;
-const triggerAddress = env.TRIGGER_ADDRESS;
-const ownerAddress = env.OWNER_ADDRESS;
+const env = await loadEnv();
+const address = env("TRIGGER_ADDRESS") as string;
+
+const ownerAddress = env("OWNER_ADDRESS") as string;
 
 export async function end() {
   console.log("ending and redepositing into main account");
@@ -41,7 +40,7 @@ export async function end() {
 
   // end the trigger agent
 
-  const url = `${env.API_URL}/autonomy-sdk-api/end`;
+  const url = `${env("API_URL")}/autonomy-sdk-api/end`;
   const {
     success,
   } = await fetcher<{

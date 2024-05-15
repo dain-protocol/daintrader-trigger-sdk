@@ -1,11 +1,12 @@
 import base58 from "npm:bs58";
-import { env } from "./env.ts";
+import { loadEnv } from "./env.ts";
 
 export default async function sendTX(serializedTx: Uint8Array): Promise<{
   success: boolean;
   signature?: string;
   error?: string;
 }> {
+  const env = await loadEnv();
   try {
     const { signature, success, error } = await fetch(
       env("TX_SENDER_URL") as string,
