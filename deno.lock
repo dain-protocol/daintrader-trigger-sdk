@@ -8,6 +8,7 @@
       "npm:@noble/curves": "npm:@noble/curves@1.4.0",
       "npm:@solana/web3.js": "npm:@solana/web3.js@1.91.4",
       "npm:@solana/web3.js@latest": "npm:@solana/web3.js@1.91.4",
+      "npm:@types/node": "npm:@types/node@18.16.19",
       "npm:bs58": "npm:bs58@5.0.0"
     },
     "jsr": {
@@ -321,5 +322,52 @@
         }
       }
     }
+  },
+  "redirects": {
+    "https://esm.sh/@solana/web3.js": "https://esm.sh/@solana/web3.js@1.91.8"
+  },
+  "remote": {
+    "https://deno.land/std@0.224.0/dotenv/mod.ts": "0180eaeedaaf88647318811cdaa418cc64dc51fb08354f91f5f480d0a1309f7d",
+    "https://deno.land/std@0.224.0/dotenv/parse.ts": "09977ff88dfd1f24f9973a338f0f91bbdb9307eb5ff6085446e7c423e4c7ba0c",
+    "https://deno.land/std@0.224.0/dotenv/stringify.ts": "275da322c409170160440836342eaa7cf012a1d11a7e700d8ca4e7f2f8aa4615",
+    "https://esm.sh/@solana/web3.js@1.91.8": "606f18fb0e3f2b6f330fb4365e4da44a97a88c612ca9a29f484f4fbd084ab9c9",
+    "https://esm.sh/v135/@noble/curves@1.4.0/denonext/_shortw_utils.js": "1b7f6384fd65ad44063dd470879ccc71985102451115ffeca827b95609be2a69",
+    "https://esm.sh/v135/@noble/curves@1.4.0/denonext/abstract/curve.js": "4158cfb48582c30233fa568583978c985dc630903dc3937fa6ef19398cf4e6aa",
+    "https://esm.sh/v135/@noble/curves@1.4.0/denonext/abstract/edwards.js": "fdc056112e7df795efec45b512086c7862806ac88850b7f5acbaebf0629934ab",
+    "https://esm.sh/v135/@noble/curves@1.4.0/denonext/abstract/hash-to-curve.js": "5b64ccf20a7af1c9a4b7b100553b0d8e34bdf579c7000b9d640d056bd5e6f853",
+    "https://esm.sh/v135/@noble/curves@1.4.0/denonext/abstract/modular.js": "0172102c6727676c37aefa9c2e6f6f05ba376659742117d71cdef1d6ce75baf4",
+    "https://esm.sh/v135/@noble/curves@1.4.0/denonext/abstract/montgomery.js": "a67a828d294f80f9314bbb74a4741e5560c5043034ce91e3e82963ff2677aadf",
+    "https://esm.sh/v135/@noble/curves@1.4.0/denonext/abstract/utils.js": "c7e2a4e246f8ba390823bf03011587ed035d0f4f596931bc29d7fe3a39daf4c2",
+    "https://esm.sh/v135/@noble/curves@1.4.0/denonext/abstract/weierstrass.js": "141bec01eee209717772cfdba6ce88dcc91b8ec6036fcae5887fc8021d97a003",
+    "https://esm.sh/v135/@noble/curves@1.4.0/denonext/ed25519.js": "95802a186eb477cf61abb5d361799fbd04640d8507e3157b0162e0e70af2da7e",
+    "https://esm.sh/v135/@noble/curves@1.4.0/denonext/secp256k1.js": "9cdfa426e91cb6c3f80c1992dfd13f6dac6024b5d4a4d0b16d8992dfe1311876",
+    "https://esm.sh/v135/@noble/hashes@1.4.0/denonext/_assert.js": "1ffd2ec428e790f982e6178ec269f77c1e2dfd8bad2d02328998a33311fe4cc8",
+    "https://esm.sh/v135/@noble/hashes@1.4.0/denonext/_md.js": "0d64256a7f57db1a32538d1785a6f2b4c292962b526f50774542c71f6eca00be",
+    "https://esm.sh/v135/@noble/hashes@1.4.0/denonext/crypto.js": "e8ce6f1233e496ccda7379228aa8426017735bedad6a497bf0dd61fc832cdf79",
+    "https://esm.sh/v135/@noble/hashes@1.4.0/denonext/hmac.js": "9068c257616e936e8c005e0fd4f8fbe8018e2414977701933f84fe2c83c6b8cc",
+    "https://esm.sh/v135/@noble/hashes@1.4.0/denonext/sha256.js": "907b6235f813a743240f7c78e4cb9be27e92eb911d5b90f44f7c138f257259a1",
+    "https://esm.sh/v135/@noble/hashes@1.4.0/denonext/sha3.js": "420c5eb42bd3d497f6cfa510947b095dce70db4e5bc3d6e53d6678ac41420006",
+    "https://esm.sh/v135/@noble/hashes@1.4.0/denonext/sha512.js": "f004f9f72ffc4e1af353c2b42a0c4a331415322e6af1ba2f756602e6cbf0136b",
+    "https://esm.sh/v135/@noble/hashes@1.4.0/denonext/utils.js": "ab93c0722cdd5d75695482b9bcc4d514d61934595204030a9881a09488be3634",
+    "https://esm.sh/v135/@solana/buffer-layout@4.0.1/denonext/buffer-layout.mjs": "8a9f7caf309d30afa9406077cda857256401bff1e734662f2cfc2229f776abc6",
+    "https://esm.sh/v135/@solana/web3.js@1.91.8/denonext/web3.mjs": "5f090ae6be23d53b5bf5476ef5acf0ec2016d13655064423d1a4bca59db72c51",
+    "https://esm.sh/v135/base-x@3.0.9/denonext/base-x.mjs": "c291ed9850248dc2ba2e5826d7930a05d806e3a19351af88d6dd00a115e839c4",
+    "https://esm.sh/v135/bigint-buffer@1.1.5/denonext/bigint-buffer.mjs": "0205470ab943cadb0a44181d8fe5cf82f4efedc82d1305f62b21ce59cff90b54",
+    "https://esm.sh/v135/bn.js@5.2.1/denonext/bn.mjs": "7b05196c10ac134bef7c46d544930542f89584d4a6129ed84f7d77c3c2ef4086",
+    "https://esm.sh/v135/borsh@0.7.0/denonext/borsh.mjs": "5ef3a399206f1d2b79e8a0372036bc322aac76c399d9965e3ab180dbaada243b",
+    "https://esm.sh/v135/bs58@4.0.1/denonext/bs58.mjs": "4e4db8196089dc41e6634102a5e4a451d3857697b1e25572ff344572ff8b0c67",
+    "https://esm.sh/v135/bufferutil@4.0.8/denonext/bufferutil.mjs": "60a4618cbd1a5cb24935c55590b793d4ecb33862357d32e1d4614a0bbb90947f",
+    "https://esm.sh/v135/eventemitter3@4.0.7/denonext/eventemitter3.mjs": "6f8a6195e1a9effb73bb163c577400d608dec7c4e0bd839045fd9ea4db66e9fe",
+    "https://esm.sh/v135/jayson@4.1.0/denonext/lib/client/browser.js": "70aae7a7324c83199bf78e4c3b27fbf2aa19a237e6790efb9da413a48af8a991",
+    "https://esm.sh/v135/node-gyp-build@4.6.1/denonext/node-gyp-build.mjs": "5d28b312f145a6cb2ec0dbdd80a7d34c0e0e6b5dcada65411d8bcff6c8991cc6",
+    "https://esm.sh/v135/node_fetch.js": "b11355358cf61343a3c30bd5942df60a3586d13e2c979b515164bfe851662798",
+    "https://esm.sh/v135/rpc-websockets@7.11.0/denonext/dist/lib/client.js": "2b1a36925c2980e6d2ffb746d3683dae4ee9db14d434f766992ff9616f6e2d6d",
+    "https://esm.sh/v135/rpc-websockets@7.11.0/denonext/dist/lib/client/websocket.js": "9c520326ffdd6c87d35ed37f89d93e56aaf7532a4376cc08fbfc0257f3643d3b",
+    "https://esm.sh/v135/safe-buffer@5.2.1/denonext/safe-buffer.mjs": "facbcb4f4622e13062978522fa12c42cae4e12f55b0e1d3fa1c4bc751bd827c7",
+    "https://esm.sh/v135/superstruct@0.14.2/denonext/superstruct.mjs": "f6e68cb60764113e9947014317992a2e44c75e7d762bbd99b37080bb408d71ba",
+    "https://esm.sh/v135/text-encoding-utf-8@1.0.2/denonext/text-encoding-utf-8.mjs": "aa44fc0fb23ea66c51e11444b7f72c6f2b1dc872183f7e756cd147e9fb871f2e",
+    "https://esm.sh/v135/utf-8-validate@6.0.3/denonext/utf-8-validate.mjs": "410c48d66840e987e474a4849cd25829817415cedd25466280effb1287d05aa5",
+    "https://esm.sh/v135/uuid@8.3.2/denonext/uuid.mjs": "c0da38266b24ac79d62b02290f17caba7e75d078f6771bbe8fb61bdef60f837c",
+    "https://esm.sh/v135/ws@8.17.0/denonext/ws.mjs": "098384c6d6b787c4074dae8141a61bfa93a271ccb699b4b426c75141c9ef5560"
   }
 }
