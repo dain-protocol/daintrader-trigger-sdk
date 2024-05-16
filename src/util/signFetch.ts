@@ -7,7 +7,7 @@ const env = await loadEnv();
 
 const triggerAddress = env("TRIGGER_ADDRESS");
 const triggerKeypair = Keypair.fromSecretKey(
-  base58.decode(env("TRIGGER_ADDRESS_PRIVATE_KEY")),
+  base58.decode(env("TRIGGER_ADDRESS_PRIVATE_KEY") as string),
 );
 export async function signData(
   data: Object,
