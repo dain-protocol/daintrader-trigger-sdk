@@ -1,4 +1,7 @@
 export async function loadEnv(): Promise<(key: string) => string | undefined> {
+  return (key: string) => Deno.env.get(key);
+
+  /*
   if (
     Deno.env.get("DEPLOYED") === "true"
   ) {
@@ -12,4 +15,5 @@ export async function loadEnv(): Promise<(key: string) => string | undefined> {
   const env = loadSync();
 
   return (key: string) => env[key];
+  */
 }
