@@ -1,6 +1,6 @@
 import { assertEquals } from "jsr:@std/assert";
 
-import { assets, price } from "../src/index.ts";
+import { assets, price } from "../src/data.ts";
 
 Deno.test("price", async () => {
   const btcPrice = await price("btc");

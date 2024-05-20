@@ -206,3 +206,44 @@ No need to import any libraries when using it in your bots!
  - `amount`: The amount of SOL to send.
  - Returns a promise that resolves to the transaction signature as a string if successful, or `undefined` if the transaction fails.
 
+
+# Persistent Storage
+
+Since the trading scripts run on non-persistent serverless functions, you cannot directly set a variable and expect it to be available the next time the script runs. To overcome this limitation, we provide the `getValue` and `setValue` functions for persistent storage.
+
+Note: The stored values are specific to each trigger agent, so different agents will have their own separate storage.
+
+### `setValue(key: string, value: any): Promise<any>`
+
+Sets a key-value pair in persistent storage.
+
+- `key`: The key to store the value under.
+- `value`: The value to store.
+- Returns a promise that resolves to the stored value.
+
+### `getValue(key: string): Promise<any>`
+
+Retrieves a value from persistent storage based on the provided key.
+
+- `key`: The key to retrieve the value for.
+- Returns a promise that resolves to the retrieved value.
+
+Use the `setValue` function to store values that you want to persist across script executions. You can then retrieve those values using the `getValue` function in subsequent script runs.
+
+Here's an example of how to use `getValue` and `setValue`:
+
+```typescript
+async function persistantCounter() {
+  // Store a value
+  await setValue("counter", 0);
+
+  // Retrieve the value
+  const counter = await getValue("counter");
+  console.log(counter); // Output: 0
+
+  // Increment the counter
+  await setValue("counter", counter + 1);
+}
+
+persistantCounter();
+```
