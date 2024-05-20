@@ -115,6 +115,34 @@ No need to import any libraries when using it in your bots!
  ```
  Cron Schedule: `0 9 * * 1`
 
+# Webhook Triggers
+
+In addition to scheduling scripts using cron jobs, you can also trigger your trading scripts by sending a webhook request to your agent's unique webhook URL. When a script is triggered via a webhook, the body of the webhook request is passed to the script through the `webhookBody` variable.
+
+The `webhookBody` variable will contain the parsed body of the webhook request. You can access and utilize this data to make decisions or perform specific actions in your trading script.
+
+Here's an example of how to use the `webhookBody` in your script:
+
+```typescript
+async function handleWebhook() {
+  if (webhookBody) {
+    const action = webhookBody.action;
+    const amount = webhookBody.amount;
+
+    if (action === "buy") {
+      await swap("USDC", "SOL", amount, 50);
+      log(`Bought ${amount} SOL based on webhook trigger`);
+    } else if (action === "sell") {
+      await swap("SOL", "USDC", amount, 50);
+      log(`Sold ${amount} SOL based on webhook trigger`);
+    }
+  } else {
+    log("No webhook body found");
+  }
+}
+
+handleWebhook();
+```
 
  # Functions
 
