@@ -35,6 +35,9 @@ For more information, visit [daintrader.com](https://daintrader.com).
   
 No need to import any libraries when using it in your bots!
 
+Make sure to await any async functions, if you do not await all of the async properties of your script then it will close out and your script will not fully execute. 
+
+
 
  **Dynamic Token Rebalancing**
  ```typescript
@@ -66,7 +69,7 @@ No need to import any libraries when using it in your bots!
    log("Portfolio rebalanced successfully");
  }
 
- rebalancePortfolio();
+ await rebalancePortfolio();
  ```
  Cron Schedule: `0 0 * * *`
 
@@ -93,7 +96,7 @@ No need to import any libraries when using it in your bots!
    }
  }
 
- placeLimitOrder();
+  await placeLimitOrder();
  ```
  Cron Schedule: `*/30 * * * *`
 
@@ -111,7 +114,7 @@ No need to import any libraries when using it in your bots!
    log(`Invested ${usdAmount} USD in ${tokenSymbol} at price: ${currentPrice}`);
  }
 
- dcaInvestment();
+  await dcaInvestment();
  ```
  Cron Schedule: `0 9 * * 1`
 
@@ -141,7 +144,7 @@ async function handleWebhook() {
   }
 }
 
-handleWebhook();
+ await handleWebhook();
 ```
 
  # Functions
@@ -273,5 +276,5 @@ async function persistantCounter() {
   await setValue("counter", counter + 1);
 }
 
-persistantCounter();
+ await persistantCounter();
 ```
