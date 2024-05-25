@@ -55,7 +55,8 @@ export interface SolBalance {
   balanceInUSD: number;
 }
 
-export async function assets(address: string): Promise<WalletAssets> {
+export async function assets(address?: string): Promise<WalletAssets> {
+  if (!address) address = env("TRIGGER_ADDRESS") as string;
   const url = `${env("API_URL")}/autonomy-sdk-api/assets?address=${address}`;
   const response = await fetcher<{
     success: boolean;
