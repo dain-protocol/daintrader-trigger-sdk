@@ -25,5 +25,5 @@ export async function spawn_sub_agent(
   });
 
   if (!response.success) throw new Error("Failed to Spawn Sub Agent");
-  return response.result;
+  return response.result.toUpperCase();
 }
