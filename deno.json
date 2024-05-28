@@ -2,5 +2,8 @@
   "tasks": {
     "dev": "deno run --watch src/index.ts",
     "test": "deno test --allow-read --allow-write --allow-net --allow-env"
-  }
+  },
+  "name": "@dain/daintrader-trigger-sdk",
+  "version": "0.0.10-beta",
+  "exports": "./src/index.ts"
 }

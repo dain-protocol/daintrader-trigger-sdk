@@ -278,3 +278,43 @@ async function persistantCounter() {
 
  await persistantCounter();
 ```
+
+# Spawning a Sub Agent
+
+You can spawn a sub agent to search the web and find any information you need. This can be useful for making decisions based on external data or events.
+
+### `spawn_sub_agent(query: string, responseType: string): Promise<string>`
+
+Spawns a sub AI agent that can search the web and find the requested information.
+
+- `query`: The query or question to ask the sub agent.
+- `responseType`: The expected type of the response. Can be "boolean", "number", or "string".
+- Returns a promise that resolves to the sub agent's response as a string.
+
+The response from the sub agent is always a string, but you can specify the expected response type and convert it accordingly in your code:
+- Booleans will be in "TRUE" or "FALSE" format.
+- Numbers will be in "123" format.
+- Strings will be in "hello" format.
+
+Here's an example of how to use `spawn_sub_agent` to check if World War 3 has started and sell all your Bitcoin accordingly:
+
+```typescript
+async function checkWorldWarStatus() {
+  const query = "Has World War 3 started?";
+  const response = await spawn_sub_agent(query, "boolean");
+
+  if (response === "TRUE") {
+    const bitcoinBalance = await assets().sol.balance;
+    await swap("BTC", "USDC", bitcoinBalance, 50);
+    log("World War 3 has started. Sold all Bitcoin.");
+  } else {
+    log("World War 3 has not started. Holding Bitcoin.");
+  }
+}
+
+ await checkWorldWarStatus();
+```
+
+In this example, the script spawns a sub agent to check if World War 3 has started. The sub agent searches the web and returns a boolean response. If the response is "TRUE", indicating that World War 3 has started, the script retrieves the Bitcoin balance from the wallet and sells all of it for USDC. If the response is "FALSE", the script logs a message indicating that it is holding Bitcoin.
+
+Remember to handle the response appropriately based on the specified `responseType`. Convert the string response to the desired type (boolean, number, or string) in your code.
