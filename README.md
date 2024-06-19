@@ -72,6 +72,37 @@ Make sure to await any async functions, if you do not await all of the async pro
  await rebalancePortfolio();
  ```
  Cron Schedule: `0 0 * * *`
+### Example of Volume-Based Trading Strategy
+
+Cron Schedule: `0 0 * * *`
+
+**Volume-Based Trading Strategy**
+
+```typescript
+import { tokenStat, swap, log } from './path-to-your-modules';
+
+const tokenSymbol = "SOL";
+const highVolumeThreshold = 100000; // 24-hour volume in USD
+const lowVolumeThreshold = 50000;  // 24-hour volume in USD
+
+async function placeVolumeBasedOrder() {
+  const volume24hUSD: number = await tokenStat(tokenSymbol, "v24hUSD");
+
+  if (volume24hUSD >= highVolumeThreshold) {
+    // Place a buy order when the 24-hour volume is high
+    await swap("USDC", tokenSymbol, 1, 50);
+    log(`High volume detected. Bought ${tokenSymbol} at volume: ${volume24hUSD} USD`);
+  } else if (volume24hUSD <= lowVolumeThreshold) {
+    // Place a sell order when the 24-hour volume is low
+    await swap(tokenSymbol, "USDC", 1, 50);
+    log(`Low volume detected. Sold ${tokenSymbol} at volume: ${volume24hUSD} USD`);
+  } else {
+    log(`Current ${tokenSymbol} 24-hour volume: ${volume24hUSD} USD. No action taken.`);
+  }
+}
+
+await placeVolumeBasedOrder();
+```
 
  **Price-Based Limit Orders**
  ```typescript
@@ -147,6 +178,8 @@ async function handleWebhook() {
  await handleWebhook();
 ```
 
+
+
  # Functions
 
  ### `price(token: string): Promise<number>`
@@ -155,6 +188,151 @@ async function handleWebhook() {
 
  - `token`: The symbol of the token (e.g., "SOL").
  - Returns a promise that resolves to the price of the token as a number.
+
+### `tokenStat(token: string, statistic: string): Promise<number>`
+
+Fetches a specific statistic for a given token.
+
+- `token`: The symbol of the token (e.g., "SOL").
+- `statistic`: The specific statistic to fetch. Available options include:
+  - `price`: Current price of the token in USD.
+  - `liquidity`: Liquidity available for the token in the market.
+  - `supply`: Total supply of the token.
+  - `mc`: Market capitalization of the token.
+  - `circulatingSupply`: Circulating supply of the token.
+  - `realMc`: Real market capitalization of the token.
+  - `v30mUSD`: 30 Minute USD Volume.
+  - `v1hUSD`: 1 Hour USD Volume.
+  - `v2hUSD`: 2 Hour USD Volume.
+  - `v4hUSD`: 4 Hour USD Volume.
+  - `v6hUSD`: 6 Hour USD Volume.
+  - `v8hUSD`: 8 Hour USD Volume.
+  - `v12hUSD`: 12 Hour USD Volume.
+  - `v24hUSD`: 24 Hour USD Volume.
+  - `v30mChangePercent`: 30 Minute Volume Change Percentage.
+  - `v1hChangePercent`: 1 Hour Volume Change Percentage.
+  - `v2hChangePercent`: 2 Hour Volume Change Percentage.
+  - `v4hChangePercent`: 4 Hour Volume Change Percentage.
+  - `v6hChangePercent`: 6 Hour Volume Change Percentage.
+  - `v8hChangePercent`: 8 Hour Volume Change Percentage.
+  - `v12hChangePercent`: 12 Hour Volume Change Percentage.
+  - `v24hChangePercent`: 24 Hour Volume Change Percentage.
+  - `priceChange30mPercent`: 30 Minute Price Change Percentage.
+  - `priceChange1hPercent`: 1 Hour Price Change Percentage.
+  - `priceChange2hPercent`: 2 Hour Price Change Percentage.
+  - `priceChange4hPercent`: 4 Hour Price Change Percentage.
+  - `priceChange6hPercent`: 6 Hour Price Change Percentage.
+  - `priceChange8hPercent`: 8 Hour Price Change Percentage.
+  - `priceChange12hPercent`: 12 Hour Price Change Percentage.
+  - `priceChange24hPercent`: 24 Hour Price Change Percentage.
+  - `uniqueWallet30m`: Unique Wallets Trading in the last 30 minutes.
+  - `uniqueWallet1h`: Unique Wallets Trading in the last 1 hour.
+  - `uniqueWallet2h`: Unique Wallets Trading in the last 2 hours.
+  - `uniqueWallet4h`: Unique Wallets Trading in the last 4 hours.
+  - `uniqueWallet6h`: Unique Wallets Trading in the last 6 hours.
+  - `uniqueWallet8h`: Unique Wallets Trading in the last 8 hours.
+  - `uniqueWallet12h`: Unique Wallets Trading in the last 12 hours.
+  - `uniqueWallet24h`: Unique Wallets Trading in the last 24 hours.
+  - `trade30m`: Number of trades in the last 30 minutes.
+  - `trade1h`: Number of trades in the last 1 hour.
+  - `trade2h`: Number of trades in the last 2 hours.
+  - `trade4h`: Number of trades in the last 4 hours.
+  - `trade8h`: Number of trades in the last 8 hours.
+  - `trade24h`: Number of trades in the last 24 hours.
+  - `buy30m`: Number of buy trades in the last 30 minutes.
+  - `buy1h`: Number of buy trades in the last 1 hour.
+  - `buy2h`: Number of buy trades in the last 2 hours.
+  - `buy4h`: Number of buy trades in the last 4 hours.
+  - `buy8h`: Number of buy trades in the last 8 hours.
+  - `buy24h`: Number of buy trades in the last 24 hours.
+  - `sell30m`: Number of sell trades in the last 30 minutes.
+  - `sell1h`: Number of sell trades in the last 1 hour.
+  - `sell2h`: Number of sell trades in the last 2 hours.
+  - `sell4h`: Number of sell trades in the last 4 hours.
+  - `sell8h`: Number of sell trades in the last 8 hours.
+  - `sell24h`: Number of sell trades in the last 24 hours.
+  - `vBuy30mUSD`: Buy volume in USD for the last 30 minutes.
+  - `vBuy1hUSD`: Buy volume in USD for the last 1 hour.
+  - `vBuy2hUSD`: Buy volume in USD for the last 2 hours.
+  - `vBuy4hUSD`: Buy volume in USD for the last 4 hours.
+  - `vBuy8hUSD`: Buy volume in USD for the last 8 hours.
+  - `vBuy12hUSD`: Buy volume in USD for the last 12 hours.
+  - `vBuy24hUSD`: Buy volume in USD for the last 24 hours.
+  - `vSell30mUSD`: Sell volume in USD for the last 30 minutes.
+  - `vSell1hUSD`: Sell volume in USD for the last 1 hour.
+  - `vSell2hUSD`: Sell volume in USD for the last 2 hours.
+  - `vSell4hUSD`: Sell volume in USD for the last 4 hours.
+  - `vSell8hUSD`: Sell volume in USD for the last 8 hours.
+  - `vSell12hUSD`: Sell volume in USD for the last 12 hours.
+  - `vSell24hUSD`: Sell volume in USD for the last 24 hours.
+  - `v30m`: 30 Minute Volume in token units.
+  - `v1h`: 1 Hour Volume in token units.
+  - `v2h`: 2 Hour Volume in token units.
+  - `v4h`: 4 Hour Volume in token units.
+  - `v8h`: 8 Hour Volume in token units.
+  - `v12h`: 12 Hour Volume in token units.
+  - `v24h`: 24 Hour Volume in token units.
+  - `history30mPrice`: Price 30 minutes ago.
+  - `history1hPrice`: Price 1 hour ago.
+  - `history2hPrice`: Price 2 hours ago.
+  - `history4hPrice`: Price 4 hours ago.
+  - `history6hPrice`: Price 6 hours ago.
+  - `history8hPrice`: Price 8 hours ago.
+  - `history12hPrice`: Price 12 hours ago.
+  - `history24hPrice`: Price 24 hours ago.
+  - `uniqueWalletHistory30m`: Unique wallets trading in the last 30 minutes (historical).
+  - `uniqueWalletHistory1h`: Unique wallets trading in the last 1 hour (historical).
+  - `uniqueWalletHistory2h`: Unique wallets trading in the last 2 hours (historical).
+  - `uniqueWalletHistory4h`: Unique wallets trading in the last 4 hours (historical).
+  - `uniqueWalletHistory8h`: Unique wallets trading in the last 8 hours (historical).
+  - `uniqueWalletHistory24h`: Unique wallets trading in the last 24 hours (historical).
+  - `holder`: Number of unique holders of the token.
+  - `uniqueWallet30mChangePercent`: Percent change in unique wallets trading in the last 30 minutes.
+  - `uniqueWallet1hChangePercent`: Percent change in unique wallets trading in the last 1 hour.
+  - `uniqueWallet2hChangePercent`: Percent change in unique wallets trading in the last 2 hours.
+  - `uniqueWallet4hChangePercent`: Percent change in unique wallets trading in the last 4 hours.
+  - `uniqueWallet8hChangePercent`: Percent change in unique wallets trading in the last 8 hours.
+  - `uniqueWallet24hChangePercent`: Percent change in unique wallets trading in the last 24 hours.
+  - `trade30mChangePercent`: Percent change in number of trades in the last 30 minutes.
+  - `trade1hChangePercent`: Percent change in number of trades in the last 1 hour.
+  - `trade2hChangePercent`: Percent change in number of trades in the last 2 hours.
+  - `trade4hChangePercent`: Percent change in number of trades in the last 4 hours.
+  - `trade8hChangePercent`: Percent change in number of trades in the last 8 hours.
+  - `trade24hChangePercent`: Percent change in number of trades in the last 24 hours.
+  - `buy30mChangePercent`: Percent change in number of buy trades in the last 30 minutes.
+  - `buy1hChangePercent`: Percent change in number of buy trades in the last 1 hour.
+  - `buy2hChangePercent`: Percent change in number of buy trades in the last 2 hours.
+  - `buy4hChangePercent`: Percent change in number of buy trades in the last 4 hours.
+  - `buy8hChangePercent`: Percent change in number of buy trades in the last 8 hours.
+  - `buy24hChangePercent`: Percent change in number of buy trades in the last 24 hours.
+  - `sell30mChangePercent`: Percent change in number of sell trades in the last 
+
+30 minutes.
+  - `sell1hChangePercent`: Percent change in number of sell trades in the last 1 hour.
+  - `sell2hChangePercent`: Percent change in number of sell trades in the last 2 hours.
+  - `sell4hChangePercent`: Percent change in number of sell trades in the last 4 hours.
+  - `sell8hChangePercent`: Percent change in number of sell trades in the last 8 hours.
+  - `sell24hChangePercent`: Percent change in number of sell trades in the last 24 hours.
+
+- Returns a promise that resolves to the requested statistic as a number.
+
+Example usage:
+```typescript
+import { tokenStat } from './path-to-your-file';
+
+async function getTokenStatistic() {
+ try {
+   const price = await tokenStat("SOL", "price");
+   console.log(`The current price of SOL is $${price}`);
+ } catch (error) {
+   console.error("Error fetching token statistic:", error);
+ }
+}
+
+getTokenStatistic();
+```
+
+This function fetches the specified statistic for the given token from the API and returns it as a number. If the fetch operation fails, an error is thrown.
 
  ### `assets(): Promise<WalletAssets>`
 

@@ -1,11 +1,26 @@
 import { assertEquals } from "jsr:@std/assert";
 
-import { assets, price } from "../src/data.ts";
+import { assets, price, tokenStat } from "../src/data.ts";
 
 Deno.test("price", async () => {
   const btcPrice = await price("btc");
   assertEquals(typeof btcPrice, "number");
   assertEquals(btcPrice > 0, true);
+});
+
+Deno.test("token Stats", async () => {
+  const solMarketCap = await tokenStat("sol", "mc");
+  const solCirculatingSupply = await tokenStat("sol", "circulatingSupply");
+  const solTotalSupply = await tokenStat("sol", "supply");
+
+  assertEquals(typeof solTotalSupply, "number");
+  assertEquals(solTotalSupply > 0, true);
+
+  assertEquals(typeof solCirculatingSupply, "number");
+  assertEquals(solCirculatingSupply > 0, true);
+
+  assertEquals(typeof solMarketCap, "number");
+  assertEquals(solMarketCap > 0, true);
 });
 
 Deno.test("assets", async () => {

@@ -1,4 +1,4 @@
-import { assets, price } from "./data.ts";
+import { assets, price, tokenStat } from "./data.ts";
 import { sendSol, sendToken, swap } from "./transaction.ts";
 import { end } from "./end.ts";
 import { getValue, setValue } from "./value.ts";
@@ -13,4 +13,5 @@ export {
   setValue,
   spawn_sub_agent,
   swap,
+  tokenStat,
 };

@@ -17,6 +17,23 @@ export async function price(token: string): Promise<number> {
   if (!response.success) throw new Error("Failed to fetch price");
   return response.price;
 }
+export async function tokenStat(
+  token: string,
+  statistic: string,
+): Promise<number> {
+  const url = `${
+    env("API_URL")
+  }/autonomy-sdk-api/solana/token-stat?token=${token}&triggerAddress=${triggerAddress}&stat=${statistic}`;
+  const response = await fetcher<{
+    statistic: number;
+    success: boolean;
+  }>(url, {
+    method: "GET",
+  });
+
+  if (!response.success) throw new Error("Failed to fetch statistic");
+  return response.statistic;
+}
 
 export interface WalletAssets {
   tokens: FungibleTokenBalanceExpanded[];
