@@ -32,7 +32,7 @@ async function createSwapTx(
   amount: number,
   slippageBps: number,
 ): Promise<string> {
-  const url = `${env("API_URL")}/autonomy-sdk-api/tx/swap`;
+  const url = `${env("API_URL")}/autonomy-sdk-api/solana/tx/swap`;
   const {
     success,
     serializedTx,
@@ -68,7 +68,7 @@ async function createSendTokenTx(
   token: string,
   amount: number,
 ): Promise<string> {
-  const url = `${env("API_URL")}/autonomy-sdk-api/tx/sendToken`;
+  const url = `${env("API_URL")}/autonomy-sdk-api/solana/tx/sendToken`;
 
   const {
     success,
@@ -99,7 +99,7 @@ export async function sendSol(
 }
 
 async function createSendSolTx(to: string, amount: number): Promise<string> {
-  const url = `${env("API_URL")}/autonomy-sdk-api/tx/sendSol`;
+  const url = `${env("API_URL")}/autonomy-sdk-api/solana/tx/sendSol`;
   const {
     serializedTx,
     success,

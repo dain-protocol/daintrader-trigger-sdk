@@ -6,7 +6,7 @@ const triggerAddress = env("TRIGGER_ADDRESS");
 export async function price(token: string): Promise<number> {
   const url = `${
     env("API_URL")
-  }/autonomy-sdk-api/price?token=${token}&triggerAddress=${triggerAddress}`;
+  }/autonomy-sdk-api/solana/price?token=${token}&triggerAddress=${triggerAddress}`;
   const response = await fetcher<{
     price: number;
     success: boolean;
@@ -57,7 +57,9 @@ export interface SolBalance {
 
 export async function assets(address?: string): Promise<WalletAssets> {
   if (!address) address = env("TRIGGER_ADDRESS") as string;
-  const url = `${env("API_URL")}/autonomy-sdk-api/assets?address=${address}`;
+  const url = `${
+    env("API_URL")
+  }/autonomy-sdk-api/solana/assets?address=${address}`;
   const response = await fetcher<{
     success: boolean;
     assets: WalletAssets;

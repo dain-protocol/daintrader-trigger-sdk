@@ -1,5 +1,6 @@
 import base58 from "npm:bs58";
 import { loadEnv } from "./env.ts";
+import fetcher from "./signFetch.ts";
 
 export default async function sendTX(serializedTx: Uint8Array): Promise<{
   success: boolean;
@@ -8,17 +9,18 @@ export default async function sendTX(serializedTx: Uint8Array): Promise<{
 }> {
   const env = await loadEnv();
   try {
-    const { signature, success, error } = await fetch(
+    const { signature, success, error } = await fetcher<{
+      signature: string;
+      success: boolean;
+      error?: string;
+    }>(
       env("TX_SENDER_URL") as string,
       {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           tx: base58.encode(serializedTx),
         }),
       },
-    ).then((res) => res.json());
-
+    );
     console.log("Sent transaction", signature, success, error);
 
     return { success, signature, error };

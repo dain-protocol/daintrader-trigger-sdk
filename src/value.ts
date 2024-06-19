@@ -4,7 +4,7 @@ const env = await loadEnv();
 const triggerAddress = env("TRIGGER_ADDRESS");
 
 export async function setValue(key: string, value: any): Promise<any> {
-  const url = `${env("API_URL")}/autonomy-sdk-api/setValue`;
+  const url = `${env("API_URL")}/autonomy-sdk-api/common/setValue`;
   const response = await fetcher<{
     value: any;
     success: boolean;
@@ -21,7 +21,7 @@ export async function setValue(key: string, value: any): Promise<any> {
 }
 
 export async function getValue(key: string): Promise<any> {
-  const url = `${env("API_URL")}/autonomy-sdk-api/getValue`;
+  const url = `${env("API_URL")}/autonomy-sdk-api/common/getValue`;
   const response = await fetcher<{
     value: any;
     success: boolean;

@@ -26,10 +26,12 @@ export default async function fetcher<T>(
   try {
     const body = init?.body ? init.body : JSON.stringify({});
 
+    const pathname_and_query = new URL(input as string).pathname +
+      (new URL(input as string).search || "");
     const toSign = {
       body,
       method: init?.method || "POST",
-      url: input,
+      url: pathname_and_query,
       date: new Date().toISOString(),
       nonce: Keypair.generate().publicKey.toBase58(),
     };
@@ -49,6 +51,7 @@ export default async function fetcher<T>(
         "x-date": toSign.date,
         "x-nonce": toSign.nonce,
         "x-trigger-address": triggerAddress as string,
+        "x-chain-id": "SOLANA_MAINNET",
       },
     });
 

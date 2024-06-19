@@ -40,7 +40,7 @@ export async function end() {
 
   // end the trigger agent
 
-  const url = `${env("API_URL")}/autonomy-sdk-api/end`;
+  const url = `${env("API_URL")}/autonomy-sdk-api/common/end`;
   const {
     success,
   } = await fetcher<{
