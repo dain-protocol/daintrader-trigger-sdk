@@ -316,21 +316,6 @@ Fetches a specific statistic for a given token.
 
 - Returns a promise that resolves to the requested statistic as a number.
 
-Example usage:
-```typescript
-import { tokenStat } from './path-to-your-file';
-
-async function getTokenStatistic() {
- try {
-   const price = await tokenStat("SOL", "price");
-   console.log(`The current price of SOL is $${price}`);
- } catch (error) {
-   console.error("Error fetching token statistic:", error);
- }
-}
-
-getTokenStatistic();
-```
 
 This function fetches the specified statistic for the given token from the API and returns it as a number. If the fetch operation fails, an error is thrown.
 
