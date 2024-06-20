@@ -43,9 +43,9 @@ Make sure to await any async functions, if you do not await all of the async pro
  ```typescript
 
  const desiredAllocation = {
-   "TokenA": 0.5,
-   "TokenB": 0.3,
-   "TokenC": 0.2
+   "3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh": 0.5, // WBTC
+   "e.g. TokenB address": 0.3,
+   "e.g. TokenC address": 0.2
  };
 
  async function rebalancePortfolio() {
@@ -59,10 +59,10 @@ Make sure to await any async functions, if you do not await all of the async pro
 
      if (difference > 0) {
        // Buy tokens to reach the desired allocation
-       await swap("USDC", token, difference, 50);
+       await swap("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", token, difference, 50); // USDC / TOKEN
      } else if (difference < 0) {
-       // Sell tokens to reach the desired allocation
-       await swap(token, "USDC", Math.abs(difference), 50);
+       // Sell tokens to reach the desired allocation 
+       await swap(token, "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", Math.abs(difference), 50); // TOKEN / USDC
      }
    }
 
@@ -79,9 +79,8 @@ Cron Schedule: `0 0 * * *`
 **Volume-Based Trading Strategy**
 
 ```typescript
-import { tokenStat, swap, log } from './path-to-your-modules';
 
-const tokenSymbol = "SOL";
+const tokenSymbol = "So11111111111111111111111111111111111111112"; // SOL
 const highVolumeThreshold = 100000; // 24-hour volume in USD
 const lowVolumeThreshold = 50000;  // 24-hour volume in USD
 
@@ -90,11 +89,11 @@ async function placeVolumeBasedOrder() {
 
   if (volume24hUSD >= highVolumeThreshold) {
     // Place a buy order when the 24-hour volume is high
-    await swap("USDC", tokenSymbol, 1, 50);
+    await swap("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", tokenSymbol, 1, 50);
     log(`High volume detected. Bought ${tokenSymbol} at volume: ${volume24hUSD} USD`);
   } else if (volume24hUSD <= lowVolumeThreshold) {
     // Place a sell order when the 24-hour volume is low
-    await swap(tokenSymbol, "USDC", 1, 50);
+    await swap(tokenSymbol, "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", 1, 50);
     log(`Low volume detected. Sold ${tokenSymbol} at volume: ${volume24hUSD} USD`);
   } else {
     log(`Current ${tokenSymbol} 24-hour volume: ${volume24hUSD} USD. No action taken.`);
@@ -107,7 +106,7 @@ await placeVolumeBasedOrder();
  **Price-Based Limit Orders**
  ```typescript
 
- const tokenSymbol = "SOL";
+ const tokenSymbol = "So11111111111111111111111111111111111111112"; // SOL
  const targetPrice = 100;
  const stopLossPrice = 90;
 
@@ -116,11 +115,11 @@ await placeVolumeBasedOrder();
 
    if (currentPrice >= targetPrice) {
      // Place a sell order when the target price is reached
-     await swap(tokenSymbol, "USDC", 1, 50);
+     await swap(tokenSymbol, "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", 1, 50);
      log(`Sold ${tokenSymbol} at price: ${currentPrice}`);
    } else if (currentPrice <= stopLossPrice) {
      // Place a sell order when the stop-loss price is reached
-     await swap(tokenSymbol, "USDC", 1, 50);
+     await swap(tokenSymbol, "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", 1, 50);
      log(`Stop-loss triggered. Sold ${tokenSymbol} at price: ${currentPrice}`);
    } else {
      log(`Current ${tokenSymbol} price: ${currentPrice}. No action taken.`);
@@ -134,14 +133,14 @@ await placeVolumeBasedOrder();
  **Dollar-Cost Averaging (DCA)**
  ```typescript
 
- const tokenSymbol = "BTC";
+ const tokenSymbol = "3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh"; // WBTC
  const usdAmount = 100;
 
  async function dcaInvestment() {
    const currentPrice: number = await price(tokenSymbol);
    const tokenAmount = usdAmount / currentPrice;
 
-   await swap("USDC", tokenSymbol, tokenAmount, 50);
+   await swap("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", tokenSymbol, tokenAmount, 50);
    log(`Invested ${usdAmount} USD in ${tokenSymbol} at price: ${currentPrice}`);
  }
 
@@ -164,10 +163,10 @@ async function handleWebhook() {
     const amount = webhookBody.amount;
 
     if (action === "buy") {
-      await swap("USDC", "SOL", amount, 50);
+      await swap("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", "So11111111111111111111111111111111111111112", amount, 50); // USDC / SOL
       log(`Bought ${amount} SOL based on webhook trigger`);
     } else if (action === "sell") {
-      await swap("SOL", "USDC", amount, 50);
+      await swap("So11111111111111111111111111111111111111112", "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", amount, 50); // SOL / USDC 
       log(`Sold ${amount} SOL based on webhook trigger`);
     }
   } else {
@@ -186,14 +185,14 @@ async function handleWebhook() {
 
  Fetches the price of a given token.
 
- - `token`: The symbol of the token (e.g., "SOL").
+ - `token`: The address of the token e.g. "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263"
  - Returns a promise that resolves to the price of the token as a number.
 
 ### `tokenStat(token: string, statistic: string): Promise<number>`
 
 Fetches a specific statistic for a given token.
 
-- `token`: The symbol of the token (e.g., "SOL").
+- `token`: The address of the token (e.g., "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263").
 - `statistic`: The specific statistic to fetch. Available options include:
   - `price`: Current price of the token in USD.
   - `liquidity`: Liquidity available for the token in the market.
@@ -377,8 +376,8 @@ This function fetches the specified statistic for the given token from the API a
 
  Performs a token swap.
 
- - `fromToken`: The address of the token to swap from.
- - `toToken`: The address of the token to swap to.
+ - `fromToken`: The address of the token to swap from e.g. "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+ - `toToken`: The address of the token to swap to. e.g. "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
  - `amount`: The amount of tokens to swap.
  - `slippageBps`: The allowed slippage in basis points.
  - Returns a promise that resolves to the transaction signature as a string if successful, or `undefined` if the swap fails.
@@ -388,7 +387,7 @@ This function fetches the specified statistic for the given token from the API a
  Sends a specified amount of tokens to a recipient.
 
  - `to`: The recipient's wallet address.
- - `token`: The address of the token to send.
+ - `token`: The address of the token to send. e.g. "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
  - `amount`: The amount of tokens to send.
  - Returns a promise that resolves to the transaction signature as a string if successful, or `undefined` if the transaction fails.
 
@@ -468,7 +467,7 @@ async function checkWorldWarStatus() {
 
   if (response === "TRUE") {
     const bitcoinBalance = await assets().sol.balance;
-    await swap("BTC", "USDC", bitcoinBalance, 50);
+    await swap("3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh", "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", bitcoinBalance, 50); // WBTC / USDC
     log("World War 3 has started. Sold all Bitcoin.");
   } else {
     log("World War 3 has not started. Holding Bitcoin.");
