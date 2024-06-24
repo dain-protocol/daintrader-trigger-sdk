@@ -414,6 +414,17 @@ Sets a key-value pair in persistent storage.
 - `value`: The value to store.
 - Returns a promise that resolves to the stored value.
 
+### `sendNotification(platform: string, message: string): Promise<boolean>`
+
+Sends a notification to the specified platform. The current allowed values for platform are `telegram`
+
+- `platform`: The platform the send the notification to
+- `message`: The message as a string to send to the platform 
+- returns a promise with a boolean indidicating success or failure of sending the notification
+
+For notifications, make sure to connect the account on the dashboard because otherwise notificatins wont get delivered.
+
+
 ### `getValue(key: string): Promise<any>`
 
 Retrieves a value from persistent storage based on the provided key.
