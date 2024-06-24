@@ -148,6 +148,51 @@ await placeVolumeBasedOrder();
  ```
  Cron Schedule: `0 9 * * 1`
 
+### Daily Bitcoin Market Summary Script
+
+This script demonstrates how to create a daily Bitcoin market summary using DAINTRADER Autonomous Trading Agents. It combines on-chain data with web-sourced news to provide a comprehensive market overview.
+
+```typescript
+async function dailyBitcoinSummary() {
+  // Bitcoin WBTC token address
+  const bitcoinAddress = "3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh";
+
+  // Gather Bitcoin stats
+  const currentPrice = await price(bitcoinAddress);
+  const priceChange24h = await tokenStat(bitcoinAddress, "priceChange24hPercent");
+  const volume24h = await tokenStat(bitcoinAddress, "v24hUSD");
+
+  // Create a query for the sub agent, including the stats
+  const query = `Please search the web for a daily summary on Bitcoin news and return 3 sentences for a daily user briefing on the state of the market. Include these stats in your summary: Current price: $${currentPrice.toFixed(2)}, 24h price change: ${priceChange24h.toFixed(2)}%, 24h trading volume: $${(volume24h / 1e6).toFixed(2)} million.`;
+
+  // Spawn sub agent to get the market summary
+  const marketSummary = await spawn_sub_agent(query, "string");
+
+  // Compose the notification message
+  const message = `Daily Bitcoin Market Summary:
+
+Current Price: $${currentPrice.toFixed(2)}
+24h Price Change: ${priceChange24h.toFixed(2)}%
+24h Trading Volume: $${(volume24h / 1e6).toFixed(2)} million
+
+${marketSummary}`;
+
+  // Send the notification
+  const notificationSent = await sendNotification("telegram", message);
+
+  if (notificationSent) {
+    log("Daily Bitcoin summary notification sent successfully.");
+  } else {
+    log("Failed to send daily Bitcoin summary notification.");
+  }
+}
+
+// Execute the function
+await dailyBitcoinSummary();
+```
+cron schedule: 0 9 * * *
+
+
 # Webhook Triggers
 
 In addition to scheduling scripts using cron jobs, you can also trigger your trading scripts by sending a webhook request to your agent's unique webhook URL. When a script is triggered via a webhook, the body of the webhook request is passed to the script through the `webhookBody` variable.
@@ -453,6 +498,8 @@ Sends a notification to the specified platform. The current allowed values for p
 - returns a promise with a boolean indidicating success or failure of sending the notification
 
 For notifications, make sure to connect the account on the dashboard because otherwise notificatins wont get delivered.
+
+
 
 # Spawning a Sub Agent
 
