@@ -49,7 +49,18 @@ async function createSwapTx(
     }),
   });
 
-  if (!success) throw new Error("Failed to fetch tx");
+  if (!success) {
+    throw new Error(
+      "Failed to fetch tx" +
+        JSON.stringify({
+          fromToken,
+          toToken,
+          amount,
+          slippageBps,
+          triggerAddress,
+        }),
+    );
+  }
 
   return serializedTx;
 }
@@ -85,7 +96,16 @@ async function createSendTokenTx(
     }),
   });
 
-  if (!success) throw new Error("Failed to fetch tx");
+  if (!success) {
+    throw new Error(
+      "Failed to fetch tx" + JSON.stringify({
+        to,
+        token,
+        amount,
+        triggerAddress,
+      }),
+    );
+  }
 
   return serializedTx;
 }
@@ -114,7 +134,11 @@ async function createSendSolTx(to: string, amount: number): Promise<string> {
     }),
   });
 
-  if (!success) throw new Error("Failed to fetch tx");
+  if (!success) {
+    throw new Error(
+      "Failed to fetch tx" + JSON.stringify({ to, amount, triggerAddress }),
+    );
+  }
 
   return serializedTx;
 }
