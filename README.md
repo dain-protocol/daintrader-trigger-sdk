@@ -773,6 +773,8 @@ Performs a token swap.
 
 Since the trading scripts run on non-persistent serverless functions, you cannot directly set a variable and expect it to be available the next time the script runs. To overcome this limitation, we provide the `getValue` and `setValue` functions for persistent storage.
 
+SCRIPTS CANNOT KEEP STATE. U NEED TO USE THE setValue and getValue to keep sokmething persisting between runs of the script / cron
+
 Note: The stored values are specific to each trigger agent, so different agents will have their own separate storage.
 
 ### `setValue(key: string, value: any): Promise<any>`
@@ -785,7 +787,7 @@ Sets a key-value pair in persistent storage.
 
 ### `getValue(key: string): Promise<any>`
 
-Retrieves a value from persistent storage based on the provided key.
+Retrieves a value from persistent storage based on the provided key. SCRIPTS CANNOT KEEP STATE. U NEED TO USE THE setValue and getValue to keep sokmething persisting between runs of the script / cron
 
 - `key`: The key to retrieve the value for.
 - Returns a promise that resolves to the retrieved value.
