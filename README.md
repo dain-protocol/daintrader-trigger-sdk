@@ -42,34 +42,84 @@ Make sure to await any async functions, if you do not await all of the async pro
  **Dynamic Token Rebalancing**
  ```typescript
 
- const desiredAllocation = {
-   "3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh": 0.5, // WBTC
-   "e.g. TokenB address": 0.3,
-   "e.g. TokenC address": 0.2
- };
+const desiredAllocation = {
+  "3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh": 0.5, // WBTC
+  "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": 0.3, // USDC
+  "So11111111111111111111111111111111111111112": 0.2  // SOL
+};
 
- async function rebalancePortfolio() {
-   const walletAssets: WalletAssets = await assets();
-   const totalBalance = walletAssets.total_in_usd;
+const usdcAddress = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+const minSolForFees = 0.01; // Minimum SOL balance required for fees
+const rebalanceThreshold = 0.05; // 5% threshold for rebalancing
 
-   for (const token in desiredAllocation) {
-     const targetBalance = totalBalance * desiredAllocation[token];
-     const currentBalance = walletAssets.tokens.find(t => t.symbol === token)?.balanceInUSD || 0;
-     const difference = targetBalance - currentBalance;
+async function rebalancePortfolio() {
+  try {
+    const walletAssets = await assets();
+    const solBalance = walletAssets.sol.balance;
 
-     if (difference > 0) {
-       // Buy tokens to reach the desired allocation
-       await swap("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", token, difference, 50); // USDC / TOKEN
-     } else if (difference < 0) {
-       // Sell tokens to reach the desired allocation 
-       await swap(token, "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", Math.abs(difference), 50); // TOKEN / USDC
-     }
-   }
+    if (solBalance < minSolForFees) {
+      log(`Insufficient SOL balance for fees. Required: ${minSolForFees} SOL, Available: ${solBalance.toFixed(9)} SOL`);
+      return;
+    }
 
-   log("Portfolio rebalanced successfully");
- }
+    const totalBalanceUSD = walletAssets.total_in_usd;
+    log(`Total portfolio value: $${totalBalanceUSD.toFixed(2)}`);
 
- await rebalancePortfolio();
+    for (const [tokenAddress, targetAllocation] of Object.entries(desiredAllocation)) {
+      const token = walletAssets.tokens.find(t => t.token.address === tokenAddress) || 
+                    (tokenAddress === "So11111111111111111111111111111111111111112" ? { balanceInUSD: walletAssets.sol.balanceInUSD, symbol: "SOL" } : null);
+
+      if (!token) {
+        log(`Token ${tokenAddress} not found in wallet. Skipping.`);
+        continue;
+      }
+
+      const currentAllocation = token.balanceInUSD / totalBalanceUSD;
+      const targetBalanceUSD = totalBalanceUSD * targetAllocation;
+      const diffUSD = targetBalanceUSD - token.balanceInUSD;
+      const diffPercentage = Math.abs(diffUSD / targetBalanceUSD);
+
+      log(`${token.symbol}: Current allocation: ${(currentAllocation * 100).toFixed(2)}%, Target: ${(targetAllocation * 100).toFixed(2)}%`);
+
+      if (diffPercentage > rebalanceThreshold) {
+        if (diffUSD > 0) {
+          // Need to buy more of this token
+          const usdcToken = walletAssets.tokens.find(t => t.token.address === usdcAddress);
+          if (!usdcToken || usdcToken.balanceInUSD < diffUSD) {
+            log(`Insufficient USDC balance to buy ${token.symbol}. Skipping.`);
+            continue;
+          }
+          const amountToBuy = diffUSD / usdcToken.price_per_token;
+          const txSignature = await swap(usdcAddress, tokenAddress, amountToBuy, 50);
+          log(`Bought ${amountToBuy.toFixed(6)} ${token.symbol} worth $${diffUSD.toFixed(2)}. Transaction: ${txSignature}`);
+        } else {
+          // Need to sell some of this token
+          const amountToSell = Math.abs(diffUSD) / token.price_per_token;
+          const txSignature = await swap(tokenAddress, usdcAddress, amountToSell, 50);
+          log(`Sold ${amountToSell.toFixed(6)} ${token.symbol} worth $${Math.abs(diffUSD).toFixed(2)}. Transaction: ${txSignature}`);
+        }
+      } else {
+        log(`${token.symbol} is within the rebalance threshold. No action needed.`);
+      }
+    }
+
+    log("Portfolio rebalancing completed.");
+
+    // Log updated balances
+    const updatedAssets = await assets();
+    log("Updated portfolio balances:");
+    for (const token of updatedAssets.tokens) {
+      log(`${token.symbol}: ${token.balance.toFixed(6)} (${token.balanceInUSD.toFixed(2)} USD)`);
+    }
+    log(`SOL: ${updatedAssets.sol.balance.toFixed(9)} (${updatedAssets.sol.balanceInUSD.toFixed(2)} USD)`);
+    log(`Total portfolio value: $${updatedAssets.total_in_usd.toFixed(2)}`);
+
+  } catch (error) {
+    log(`An error occurred during rebalancing: ${error}`);
+  }
+}
+
+await rebalancePortfolio();
  ```
  Cron Schedule: `0 0 * * *`
 ### Example of Volume-Based Trading Strategy
@@ -80,23 +130,64 @@ Cron Schedule: `0 0 * * *`
 
 ```typescript
 
-const tokenSymbol = "So11111111111111111111111111111111111111112"; // SOL
-const highVolumeThreshold = 100000; // 24-hour volume in USD
-const lowVolumeThreshold = 50000;  // 24-hour volume in USD
+const solAddress = "So11111111111111111111111111111111111111112"; // SOL
+const usdcAddress = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"; // USDC
+const highVolumeThreshold = 1000000; // 24-hour volume in USD (e.g., 1 million)
+const lowVolumeThreshold = 500000;  // 24-hour volume in USD (e.g., 500,000)
+const tradeAmount = 10; // Amount in USDC to trade
+const minSolForFees = 0.01; // Minimum SOL balance required for fees
 
 async function placeVolumeBasedOrder() {
-  const volume24hUSD: number = await tokenStat(tokenSymbol, "v24hUSD");
+  try {
+    // Check SOL balance for fees
+    const walletAssets = await assets();
+    const solBalance = walletAssets.sol.balance;
+    if (solBalance < minSolForFees) {
+      log(`Insufficient SOL balance for fees. Required: ${minSolForFees} SOL, Available: ${solBalance.toFixed(9)} SOL`);
+      return;
+    }
 
-  if (volume24hUSD >= highVolumeThreshold) {
-    // Place a buy order when the 24-hour volume is high
-    await swap("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", tokenSymbol, 1, 50);
-    log(`High volume detected. Bought ${tokenSymbol} at volume: ${volume24hUSD} USD`);
-  } else if (volume24hUSD <= lowVolumeThreshold) {
-    // Place a sell order when the 24-hour volume is low
-    await swap(tokenSymbol, "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", 1, 50);
-    log(`Low volume detected. Sold ${tokenSymbol} at volume: ${volume24hUSD} USD`);
-  } else {
-    log(`Current ${tokenSymbol} 24-hour volume: ${volume24hUSD} USD. No action taken.`);
+    // Get 24-hour volume
+    const volume24hUSD: number = await tokenStat(solAddress, "v24hUSD");
+    log(`Current 24-hour trading volume for SOL: $${volume24hUSD.toFixed(2)}`);
+
+    // Get current SOL price
+    const currentPrice = await price(solAddress);
+    log(`Current SOL price: $${currentPrice.toFixed(2)}`);
+
+    if (volume24hUSD >= highVolumeThreshold) {
+      // High volume: Buy SOL
+      const usdcBalance = walletAssets.tokens.find(t => t.token.address === usdcAddress)?.balance || 0;
+      if (usdcBalance < tradeAmount) {
+        log(`Insufficient USDC balance. Required: ${tradeAmount} USDC, Available: ${usdcBalance.toFixed(2)} USDC`);
+        return;
+      }
+
+      const txSignature = await swap(usdcAddress, solAddress, tradeAmount, 50);
+      log(`High volume detected. Bought SOL with ${tradeAmount} USDC. Transaction: ${txSignature}`);
+    } else if (volume24hUSD <= lowVolumeThreshold) {
+      // Low volume: Sell SOL
+      const solToSell = tradeAmount / currentPrice;
+      if (solBalance < solToSell + minSolForFees) {
+        log(`Insufficient SOL balance. Required: ${solToSell.toFixed(9)} SOL (plus fees), Available: ${solBalance.toFixed(9)} SOL`);
+        return;
+      }
+
+      const txSignature = await swap(solAddress, usdcAddress, solToSell, 50);
+      log(`Low volume detected. Sold ${solToSell.toFixed(9)} SOL. Transaction: ${txSignature}`);
+    } else {
+      log(`Current volume is between thresholds. No action taken.`);
+    }
+
+    // Log updated balances
+    const updatedAssets = await assets();
+    const updatedSolBalance = updatedAssets.sol.balance;
+    const updatedUsdcBalance = updatedAssets.tokens.find(t => t.token.address === usdcAddress)?.balance || 0;
+    log(`Updated SOL balance: ${updatedSolBalance.toFixed(9)} SOL`);
+    log(`Updated USDC balance: ${updatedUsdcBalance.toFixed(2)} USDC`);
+
+  } catch (error) {
+    log(`An error occurred: ${error}`);
   }
 }
 
@@ -106,47 +197,202 @@ await placeVolumeBasedOrder();
  **Price-Based Limit Orders**
  ```typescript
 
- const tokenSymbol = "So11111111111111111111111111111111111111112"; // SOL
- const targetPrice = 100;
- const stopLossPrice = 90;
+const solAddress = "So11111111111111111111111111111111111111112"; // SOL
+const usdcAddress = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"; // USDC
+const targetPrice = 100; // Target price to sell SOL
+const stopLossPrice = 90; // Stop-loss price to sell SOL
+const percentToSell = 0.5; // Sell 50% of SOL balance when conditions are met
 
- async function placeLimitOrder() {
-   const currentPrice: number = await price(tokenSymbol);
+async function placeLimitOrder() {
+  // Get current wallet assets
+  const walletAssets = await assets();
+  
+  // Check SOL balance
+  const solBalance = walletAssets.sol.balance;
+  if (solBalance <= 0) {
+    log("Insufficient SOL balance. No SOL available to sell.");
+    return;
+  }
 
-   if (currentPrice >= targetPrice) {
-     // Place a sell order when the target price is reached
-     await swap(tokenSymbol, "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", 1, 50);
-     log(`Sold ${tokenSymbol} at price: ${currentPrice}`);
-   } else if (currentPrice <= stopLossPrice) {
-     // Place a sell order when the stop-loss price is reached
-     await swap(tokenSymbol, "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", 1, 50);
-     log(`Stop-loss triggered. Sold ${tokenSymbol} at price: ${currentPrice}`);
-   } else {
-     log(`Current ${tokenSymbol} price: ${currentPrice}. No action taken.`);
-   }
- }
+  // Calculate amount of SOL to sell
+  const solToSell = solBalance * percentToSell;
 
-  await placeLimitOrder();
+  // Get current SOL price
+  const currentPrice: number = await price(solAddress);
+
+  if (currentPrice >= targetPrice) {
+    // Place a sell order when the target price is reached
+    try {
+      const txSignature = await swap(solAddress, usdcAddress, solToSell, 50);
+      log(`Target price reached. Sold ${solToSell.toFixed(9)} SOL at price: $${currentPrice.toFixed(2)}. Transaction: ${txSignature}`);
+    } catch (error) {
+      log(`Failed to execute sell order at target price: ${error}`);
+    }
+  } else if (currentPrice <= stopLossPrice) {
+    // Place a sell order when the stop-loss price is reached
+    try {
+      const txSignature = await swap(solAddress, usdcAddress, solToSell, 50);
+      log(`Stop-loss triggered. Sold ${solToSell.toFixed(9)} SOL at price: $${currentPrice.toFixed(2)}. Transaction: ${txSignature}`);
+    } catch (error) {
+      log(`Failed to execute stop-loss order: ${error}`);
+    }
+  } else {
+    log(`Current SOL price: $${currentPrice.toFixed(2)}. No action taken.`);
+  }
+
+  // Log updated SOL balance
+  const updatedAssets = await assets();
+  const updatedSolBalance = updatedAssets.sol.balance;
+  log(`Updated SOL balance: ${updatedSolBalance.toFixed(9)} SOL`);
+}
+
+await placeLimitOrder();
  ```
  Cron Schedule: `*/30 * * * *`
 
  **Dollar-Cost Averaging (DCA)**
  ```typescript
 
- const tokenSymbol = "3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh"; // WBTC
- const usdAmount = 100;
+// swap $1 of SOL into WBTC .
+// Swap $1 of USDC into WBTC
+const wbtcAddress = "3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh"; // WBTC
+const usdcAddress = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"; // USDC
+const usdAmount = 1; // Amount in USD to invest
+const minSolForFees = 0.01; // Minimum SOL balance required for fees
 
- async function dcaInvestment() {
-   const currentPrice: number = await price(tokenSymbol);
-   const tokenAmount = usdAmount / currentPrice;
+async function dcaInvestment() {
+    // Get current wallet assets
+    const walletAssets = await assets();
+    
+    // Check SOL balance
+    const solBalance = walletAssets.sol.balance;
+    if (solBalance < minSolForFees) {
+        log(`Insufficient SOL balance for fees. Required: ${minSolForFees} SOL, Available: ${solBalance.toFixed(9)} SOL`);
+        return;
+    }
+    
+    // Check USDC balance
+    const usdcBalance = walletAssets.tokens.find(t => t.token.address === usdcAddress)?.balance || 0;
+    if (usdcBalance < usdAmount) {
+        log(`Insufficient USDC balance. Required: ${usdAmount} USDC, Available: ${usdcBalance.toFixed(2)} USDC`);
+        return;
+    }
 
-   await swap("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", tokenSymbol, tokenAmount, 50);
-   log(`Invested ${usdAmount} USD in ${tokenSymbol} at price: ${currentPrice}`);
- }
+    // Swap USDC for WBTC
+    await swap(usdcAddress, wbtcAddress, usdAmount, 50); // USDC / WBTC swap
 
-  await dcaInvestment();
- ```
+    // Get current WBTC price for logging
+    const wbtcPrice = await price(wbtcAddress);
+    
+    log(`Swapped ${usdAmount} USDC to WBTC at WBTC price: $${wbtcPrice.toFixed(2)}`);
+
+    // Log the updated WBTC balance
+    const updatedAssets = await assets();
+    const wbtcBalance = updatedAssets.tokens.find(t => t.token.address === wbtcAddress)?.balance || 0;
+    log(`Current WBTC balance: ${wbtcBalance.toFixed(8)}`);
+}
+
+await dcaInvestment(); ```
  Cron Schedule: `0 9 * * 1`
+
+ **Dollar-Cost Averaging (DCA) With SOL**
+
+```typescript
+// Swap $1 worth of SOL into WBTC
+const wbtcAddress = "3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh"; // WBTC
+const solAddress = "So11111111111111111111111111111111111111112"; // SOL
+const usdAmount = 1; // Amount in USD to invest
+
+async function dcaInvestment() {
+    // Get current SOL balance and price
+    const walletAssets = await assets();
+    const solBalance = walletAssets.sol.balance;
+    const solPrice = await price(solAddress);
+    
+    // Calculate amount of SOL to swap
+    const solAmount = usdAmount / solPrice;
+    
+    if (solBalance < solAmount) {
+        log(`Insufficient SOL balance. Required: ${solAmount.toFixed(9)} SOL, Available: ${solBalance.toFixed(9)} SOL`);
+        return;
+    }
+    
+    // Swap SOL for WBTC
+    await swap(solAddress, wbtcAddress, solAmount, 50); // SOL / WBTC swap
+
+    // Get current WBTC price for logging
+    const wbtcPrice = await price(wbtcAddress);
+    
+    log(`Swapped ${solAmount.toFixed(9)} SOL (${usdAmount} USD) to WBTC at SOL price: $${solPrice.toFixed(2)} and WBTC price: $${wbtcPrice.toFixed(2)}`);
+
+    // Log the updated WBTC balance
+    const updatedAssets = await assets();
+    const wbtcBalance = updatedAssets.tokens.find(t => t.token.address === wbtcAddress)?.balance || 0;
+    log(`Current WBTC balance: ${wbtcBalance.toFixed(8)}`);
+}
+
+await dcaInvestment();
+
+```
+
+###Price alert system with notifications 
+
+```typescript
+
+const solAddress = "So11111111111111111111111111111111111111112"; // SOL
+const highPriceThreshold = 50; // Alert if price goes above $50
+const lowPriceThreshold = 30; // Alert if price goes below $30
+const notificationPlatform = "telegram"; // Change this if using a different platform
+
+async function checkPriceAndNotify() {
+  try {
+    // Get the current price of SOL
+    const currentPrice = await price(solAddress);
+    log(`Current SOL price: $${currentPrice.toFixed(2)}`);
+
+    // Get the last notified state
+    const lastNotifiedHigh = await getValue("lastNotifiedHigh") === "true";
+    const lastNotifiedLow = await getValue("lastNotifiedLow") === "true";
+
+    if (currentPrice > highPriceThreshold && !lastNotifiedHigh) {
+      // Price is above the high threshold and we haven't notified about this yet
+      const message = `🚀 SOL price alert: The price has risen above $${highPriceThreshold}! Current price: $${currentPrice.toFixed(2)}`;
+      const notificationSent = await sendNotification(notificationPlatform, message);
+      
+      if (notificationSent) {
+        log("High price notification sent successfully.");
+        await setValue("lastNotifiedHigh", "true");
+        await setValue("lastNotifiedLow", "false");
+      } else {
+        log("Failed to send high price notification.");
+      }
+    } else if (currentPrice < lowPriceThreshold && !lastNotifiedLow) {
+      // Price is below the low threshold and we haven't notified about this yet
+      const message = `📉 SOL price alert: The price has fallen below $${lowPriceThreshold}! Current price: $${currentPrice.toFixed(2)}`;
+      const notificationSent = await sendNotification(notificationPlatform, message);
+      
+      if (notificationSent) {
+        log("Low price notification sent successfully.");
+        await setValue("lastNotifiedLow", "true");
+        await setValue("lastNotifiedHigh", "false");
+      } else {
+        log("Failed to send low price notification.");
+      }
+    } else if (currentPrice <= highPriceThreshold && currentPrice >= lowPriceThreshold) {
+      // Price is between thresholds, reset notification states
+      await setValue("lastNotifiedHigh", "false");
+      await setValue("lastNotifiedLow", "false");
+      log("Price is within normal range. Notification states reset.");
+    }
+
+  } catch (error) {
+    log(`An error occurred while checking price and sending notifications: ${error}`);
+  }
+}
+
+await checkPriceAndNotify();
+```
+
 
 ### Daily Bitcoin Market Summary Script
 
@@ -202,24 +448,99 @@ The `webhookBody` variable will contain the parsed body of the webhook request. 
 Here's an example of how to use the `webhookBody` in your script:
 
 ```typescript
-async function handleWebhook() {
-  if (webhookBody) {
-    const action = webhookBody.action;
-    const amount = webhookBody.amount;
+const solAddress = "So11111111111111111111111111111111111111112"; // SOL
+const usdcAddress = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"; // USDC
+const minSolForFees = 0.01; // Minimum SOL balance required for fees
 
-    if (action === "buy") {
-      await swap("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", "So11111111111111111111111111111111111111112", amount, 50); // USDC / SOL
-      log(`Bought ${amount} SOL based on webhook trigger`);
-    } else if (action === "sell") {
-      await swap("So11111111111111111111111111111111111111112", "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", amount, 50); // SOL / USDC 
-      log(`Sold ${amount} SOL based on webhook trigger`);
+interface WebhookPayload {
+  action: "buy" | "sell";
+  amount: number;
+  token?: string;
+}
+
+async function handleWebhook() {
+  try {
+    if (!webhookBody) {
+      log("No webhook body found. Exiting.");
+      return;
     }
-  } else {
-    log("No webhook body found");
+
+    const payload = webhookBody as WebhookPayload;
+    log(`Received webhook payload: ${JSON.stringify(payload)}`);
+
+    if (!payload.action || !payload.amount) {
+      log("Invalid webhook payload. Missing action or amount.");
+      return;
+    }
+
+    const walletAssets = await assets();
+    const solBalance = walletAssets.sol.balance;
+
+    if (solBalance < minSolForFees) {
+      log(`Insufficient SOL balance for fees. Required: ${minSolForFees} SOL, Available: ${solBalance.toFixed(9)} SOL`);
+      return;
+    }
+
+    const tokenAddress = payload.token || solAddress; // Default to SOL if no token specified
+    const tokenSymbol = tokenAddress === solAddress ? "SOL" : (walletAssets.tokens.find(t => t.token.address === tokenAddress)?.symbol || "Unknown");
+
+    if (payload.action === "buy") {
+      // Check USDC balance
+      const usdcBalance = walletAssets.tokens.find(t => t.token.address === usdcAddress)?.balance || 0;
+      if (usdcBalance < payload.amount) {
+        log(`Insufficient USDC balance. Required: ${payload.amount} USDC, Available: ${usdcBalance.toFixed(2)} USDC`);
+        return;
+      }
+
+      try {
+        const txSignature = await swap(usdcAddress, tokenAddress, payload.amount, 50);
+        log(`Bought ${tokenSymbol} with ${payload.amount} USDC. Transaction: ${txSignature}`);
+      } catch (swapError) {
+        log(`Failed to execute buy order: ${swapError}`);
+      }
+    } else if (payload.action === "sell") {
+      let amountToSell: number;
+      if (tokenAddress === solAddress) {
+        if (solBalance - minSolForFees < payload.amount) {
+          log(`Insufficient SOL balance. Required: ${payload.amount} SOL (plus fees), Available: ${(solBalance - minSolForFees).toFixed(9)} SOL`);
+          return;
+        }
+        amountToSell = payload.amount;
+      } else {
+        const tokenBalance = walletAssets.tokens.find(t => t.token.address === tokenAddress)?.balance || 0;
+        if (tokenBalance < payload.amount) {
+          log(`Insufficient ${tokenSymbol} balance. Required: ${payload.amount}, Available: ${tokenBalance.toFixed(8)}`);
+          return;
+        }
+        amountToSell = payload.amount;
+      }
+
+      try {
+        const txSignature = await swap(tokenAddress, usdcAddress, amountToSell, 50);
+        log(`Sold ${amountToSell} ${tokenSymbol} for USDC. Transaction: ${txSignature}`);
+      } catch (swapError) {
+        log(`Failed to execute sell order: ${swapError}`);
+      }
+    } else {
+      log(`Invalid action: ${payload.action}. Supported actions are 'buy' and 'sell'.`);
+      return;
+    }
+
+    // Log updated balances
+    const updatedAssets = await assets();
+    log("Updated balances:");
+    log(`SOL: ${updatedAssets.sol.balance.toFixed(9)} SOL`);
+    log(`USDC: ${updatedAssets.tokens.find(t => t.token.address === usdcAddress)?.balance.toFixed(2) || 0} USDC`);
+    if (tokenAddress !== solAddress && tokenAddress !== usdcAddress) {
+      log(`${tokenSymbol}: ${updatedAssets.tokens.find(t => t.token.address === tokenAddress)?.balance.toFixed(8) || 0} ${tokenSymbol}`);
+    }
+
+  } catch (error) {
+    log(`An error occurred while handling the webhook: ${error}`);
   }
 }
 
- await handleWebhook();
+await handleWebhook();
 ```
 
 
@@ -417,16 +738,19 @@ This function fetches the specified statistic for the given token from the API a
 
  - Returns a promise that resolves when the operation is complete.
 
- ### `swap(fromToken: string, toToken: string, amount: number, slippageBps: number): Promise<string | undefined>`
+### `swap(fromToken: string, toToken: string, amount: number, slippageBps: number): Promise<string | undefined>`
 
- Performs a token swap.
+Performs a token swap.
 
- - `fromToken`: The address of the token to swap from e.g. "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
- - `toToken`: The address of the token to swap to. e.g. "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
- - `amount`: The amount of tokens to swap.
- - `slippageBps`: The allowed slippage in basis points.
- - Returns a promise that resolves to the transaction signature as a string if successful, or `undefined` if the swap fails.
+- `fromToken`: The address of the token to swap from (e.g., "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v" for USDC)
+- `toToken`: The address of the token to swap to (e.g., "So11111111111111111111111111111111111111112" for SOL)
+- `amount`: The amount of `fromToken` to swap. This should be in the units of the `fromToken`. For example:
+  - If swapping 1 USDC into another token, use `1` 
+  - If swapping 0.1 SOL into another token, use `0.1` 
+  - If swapping 0.5 WBTC into another token, use `0.5` 
+- `slippageBps`: The allowed slippage in basis points (1 bps = 0.01%). For example, 50 bps = 0.5% slippage.
 
+- Returns a promise that resolves to the transaction signature as a string if successful, or `undefined` if the swap fails.
  ### `sendToken(to: string, token: string, amount: number): Promise<string | undefined>`
 
  Sends a specified amount of tokens to a recipient.
@@ -521,20 +845,70 @@ The response from the sub agent is always a string, but you can specify the expe
 Here's an example of how to use `spawn_sub_agent` to check if World War 3 has started and sell all your Bitcoin accordingly:
 
 ```typescript
-async function checkWorldWarStatus() {
-  const query = "Has World War 3 started?";
-  const response = await spawn_sub_agent(query, "boolean");
+const wbtcAddress = "3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh"; // WBTC
+const usdcAddress = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"; // USDC
+const minSolForFees = 0.01; // Minimum SOL balance required for fees
 
-  if (response === "TRUE") {
-    const bitcoinBalance = await assets().sol.balance;
-    await swap("3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh", "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", bitcoinBalance, 50); // WBTC / USDC
-    log("World War 3 has started. Sold all Bitcoin.");
-  } else {
-    log("World War 3 has not started. Holding Bitcoin.");
+async function checkWorldWarStatus() {
+  try {
+    // Check if World War 3 has started
+    const query = "Has World War 3 started? Answer with TRUE if it has started, or FALSE if it has not.";
+    const response = await spawn_sub_agent(query, "boolean");
+
+    log(`World War 3 status check result: ${response}`);
+
+    if (response === "TRUE") {
+      log("World War 3 has reportedly started. Initiating emergency protocol to sell all Bitcoin.");
+
+      // Check wallet balances
+      const walletAssets = await assets();
+      const solBalance = walletAssets.sol.balance;
+
+      if (solBalance < minSolForFees) {
+        log(`Insufficient SOL balance for fees. Required: ${minSolForFees} SOL, Available: ${solBalance.toFixed(9)} SOL`);
+        return;
+      }
+
+      const wbtcToken = walletAssets.tokens.find(t => t.token.address === wbtcAddress);
+
+      if (!wbtcToken || wbtcToken.balance <= 0) {
+        log("No WBTC balance found in the wallet. No action needed.");
+        return;
+      }
+
+      // Sell all WBTC for USDC
+      const wbtcBalance = wbtcToken.balance;
+      log(`Current WBTC balance: ${wbtcBalance.toFixed(8)} WBTC`);
+
+      try {
+        const txSignature = await swap(wbtcAddress, usdcAddress, wbtcBalance, 100); // Using 1% slippage tolerance due to potential high volatility
+        log(`Sold all WBTC (${wbtcBalance.toFixed(8)} WBTC) for USDC. Transaction: ${txSignature}`);
+
+        // Check updated balances
+        const updatedAssets = await assets();
+        const updatedUsdcBalance = updatedAssets.tokens.find(t => t.token.address === usdcAddress)?.balance || 0;
+        log(`Updated USDC balance: ${updatedUsdcBalance.toFixed(2)} USDC`);
+      } catch (swapError) {
+        log(`Failed to swap WBTC for USDC: ${swapError}`);
+      }
+    } else {
+      log("World War 3 has not started. No action needed.");
+
+      // Optionally, log current WBTC balance
+      const walletAssets = await assets();
+      const wbtcToken = walletAssets.tokens.find(t => t.token.address === wbtcAddress);
+      if (wbtcToken) {
+        log(`Current WBTC balance: ${wbtcToken.balance.toFixed(8)} WBTC`);
+      } else {
+        log("No WBTC balance found in the wallet.");
+      }
+    }
+  } catch (error) {
+    log(`An error occurred during the World War status check: ${error}`);
   }
 }
 
- await checkWorldWarStatus();
+await checkWorldWarStatus();
 ```
 
 In this example, the script spawns a sub agent to check if World War 3 has started. The sub agent searches the web and returns a boolean response. If the response is "TRUE", indicating that World War 3 has started, the script retrieves the Bitcoin balance from the wallet and sells all of it for USDC. If the response is "FALSE", the script logs a message indicating that it is holding Bitcoin.
