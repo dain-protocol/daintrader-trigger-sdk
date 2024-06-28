@@ -36,9 +36,11 @@ async function createSwapTx(
   const {
     success,
     serializedTx,
+    response,
   } = await fetcher<{
     success: boolean;
     serializedTx: string;
+    response?: string;
   }>(url, {
     body: JSON.stringify({
       fromToken,
@@ -51,7 +53,7 @@ async function createSwapTx(
 
   if (!success) {
     throw new Error(
-      "Failed to fetch tx" +
+      "Failed to fetch tx | " + response + " | " +
         JSON.stringify({
           fromToken,
           toToken,
@@ -84,9 +86,11 @@ async function createSendTokenTx(
   const {
     success,
     serializedTx,
+    response,
   } = await fetcher<{
     success: boolean;
     serializedTx: string;
+    response?: string;
   }>(url, {
     body: JSON.stringify({
       to,
@@ -98,7 +102,7 @@ async function createSendTokenTx(
 
   if (!success) {
     throw new Error(
-      "Failed to fetch tx" + JSON.stringify({
+      "Failed to fetch tx| " + response + " | " + JSON.stringify({
         to,
         token,
         amount,
@@ -123,9 +127,11 @@ async function createSendSolTx(to: string, amount: number): Promise<string> {
   const {
     serializedTx,
     success,
+    response,
   } = await fetcher<{
     serializedTx: string;
     success: boolean;
+    response?: string;
   }>(url, {
     body: JSON.stringify({
       to,
@@ -136,7 +142,8 @@ async function createSendSolTx(to: string, amount: number): Promise<string> {
 
   if (!success) {
     throw new Error(
-      "Failed to fetch tx" + JSON.stringify({ to, amount, triggerAddress }),
+      "Failed to fetch tx| " + response + " | " +
+        JSON.stringify({ to, amount, triggerAddress }),
     );
   }
 
