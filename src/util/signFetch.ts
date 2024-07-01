@@ -51,7 +51,7 @@ export default async function fetcher<T>(
         "x-date": toSign.date,
         "x-nonce": toSign.nonce,
         "x-trigger-address": triggerAddress as string,
-        "x-chain-id": "SOLANA_MAINNET",
+        "x-chain-id": "svm-solana-mainnet",
       },
     });
 
