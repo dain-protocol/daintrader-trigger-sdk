@@ -2,7 +2,7 @@ import {
   Connection,
   Keypair,
   VersionedTransaction,
-} from "https://esm.sh/@solana/web3.js@1.91.8";
+} from "https://esm.sh/@solana/web3.js@1.95.4";
 import base58 from "npm:bs58";
 import sendTX from "./util/sendTx.ts";
 import fetcher from "./util/signFetch.ts";
